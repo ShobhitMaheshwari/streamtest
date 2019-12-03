@@ -5,20 +5,22 @@
 	<body>
 		<p>webcam</p>
 		<video autoplay></video>
-		<img></img>
+		<img id="server" width="320" height="240"></img>
+		<img id="scale" width="320" height="240"></img>
 		<script>
 			const video = document.querySelector('video');
-			const img = document.querySelector('img');
+			const img = document.getElementById('server');
+			const imgScale = document.getElementById('scale');
 
-			navigator.mediaDevices.getUserMedia({video: true}).
+			navigator.mediaDevices.getUserMedia({video: {width:80, height:60}}).
 				then((stream) => {video.srcObject = stream});
 			const getFrame = () => {
-
-			const canvas = document.createElement('canvas');
-			canvas.width = video.videoWidth;
-			canvas.height = video.videoHeight;
+				const canvas = document.createElement('canvas');
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
 				canvas.getContext('2d').drawImage(video, 0, 0);
 				const h= canvas.toDataURL('image/png');
+				imgScale.src = h;
 				return h;
 			};
 			var socket = io.connect('http://' + document.domain + ':' + location.port); 
@@ -35,7 +37,7 @@
 		    });
 			//socket.emit('create', {});
 			//const WS_URL = 'ws://localhost:5000/get';
-	        const FPS = 3;
+	        //const FPS = 3;
     	    //const ws = new WebSocket(WS_URL);
 			/*
         	ws.onopen = () => {
