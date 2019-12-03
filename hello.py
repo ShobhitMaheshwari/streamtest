@@ -10,10 +10,11 @@ socketio = SocketIO(app)
 def readb64(encoded_data):
     nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
     return cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    #sbuf = StringIO()
-    #sbuf.write(base64.b64decode(base64_string))
-    #pimg = Image.open(sbuf)
-    #return cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+
+def emit64(img):
+    x = 'data:image/png;base64,'
+    g = cv2.imencode('.png', img)[1].tostring()
+    return x+base64.b64encode(g).decode('ascii')
 
 @app.route('/')
 def index():
@@ -28,17 +29,10 @@ def gen(camera):
 
 @socketio.on('create')
 def on_create(data):
-    print(data)
-    #data = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY) # need to first decode from base64
-    
-    x = len('data:image/png;base64,')
-    image = readb64(data[x:])
-    #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    g = np.array(cv2.imencode('.jpg', image)[1]).tostring()
-    print(g)
-    r = x+base64.b64encode(g)
-
-    emit('join_room', r) # emit data back as it is
+    x = 'data:image/png;base64,'
+    image = readb64(data[len(x):])
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    emit('join_room', emit64(gray))
 
 
 if __name__ == '__main__':
